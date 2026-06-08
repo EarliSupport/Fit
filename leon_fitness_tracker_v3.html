@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Leon Fitness Command Centre v3</title>
+  <style>
+    :root{
+      --bg:#061015;--panel:#101d27;--panel2:#132938;--card:#172532;--line:#284252;
+      --text:#f4fbff;--muted:#9fb4c1;--accent:#63ffd4;--accent2:#9eff4f;
+      --warn:#ffc857;--danger:#ff5c7a;--blue:#6fb6ff;--radius:18px;
+      --shadow:0 12px 30px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at top left,#123744 0,#061015 38%,#03080b 100%);color:var(--text);padding-bottom:95px}
+    header{padding:18px 16px 10px;position:sticky;top:0;z-index:10;background:linear-gradient(180deg,rgba(6,16,21,.96),rgba(6,16,21,.82));backdrop-filter:blur(10px);border-bottom:1px solid rgba(99,255,212,.15)}
+    .kicker{color:var(--accent);font-size:12px;letter-spacing:.18em;font-weight:800}
+    h1{margin:4px 0;font-size:30px;line-height:1} h2{margin:0 0 12px}
+    .sub,.note{color:var(--muted);font-size:13px;line-height:1.45}
+    main{padding:12px;max-width:980px;margin:0 auto}.grid{display:grid;gap:12px}
+    .card{background:linear-gradient(180deg,rgba(23,37,50,.96),rgba(13,24,33,.96));border:1px solid rgba(111,182,255,.16);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow)}
+    .row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .pill{border:1px solid rgba(99,255,212,.55);color:var(--accent);padding:8px 12px;border-radius:999px;background:rgba(99,255,212,.08);font-weight:800;font-size:13px}
+    button{border:1px solid rgba(99,255,212,.75);background:rgba(99,255,212,.1);color:var(--text);border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer;margin:3px}
+    button.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#041015;border:0}
+    button.danger{border-color:var(--danger);color:#ffdbe3;background:rgba(255,92,122,.08)}
+    button.warn{border-color:var(--warn);color:#211600;background:var(--warn)}
+    label{display:block;color:var(--muted);font-size:12px;font-weight:800;margin:10px 0 4px}
+    input,textarea,select{width:100%;border:1px solid var(--line);background:#0d1922;color:var(--text);border-radius:12px;padding:11px;font-size:16px}
+    textarea{min-height:82px;resize:vertical}.statgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+    .stat{background:#0d1922;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:12px}
+    .stat small{display:block;color:var(--muted);font-weight:800;font-size:11px}.stat strong{display:block;font-size:20px;margin-top:4px}
+    .progress{height:8px;background:#0b151c;border-radius:999px;overflow:hidden;border:1px solid rgba(255,255,255,.06)}.bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%}
+    section{display:none}section.active{display:block}
+    .tabs{position:fixed;left:0;right:0;bottom:0;background:rgba(3,8,11,.97);border-top:1px solid rgba(99,255,212,.18);display:grid;grid-template-columns:repeat(6,1fr);padding:8px 8px max(8px,env(safe-area-inset-bottom));gap:5px;z-index:20}
+    .tab{padding:9px 3px;text-align:center;border-radius:12px;color:var(--muted);font-size:11px;font-weight:900;border:1px solid transparent}.tab.active{background:var(--accent2);color:#061015}
+    .subtabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px}.subtab{white-space:nowrap;border-color:rgba(111,182,255,.25);color:var(--muted)}.subtab.active{background:var(--accent);color:#061015}
+    .daycard{border:1px solid rgba(255,255,255,.08);background:#0d1922;border-radius:14px;padding:12px;margin-top:10px}
+    .badge-green{color:#051;background:#85ff9b}.badge-amber{color:#2d1b00;background:#ffd56a}.badge-red{color:#fff;background:#ff5c7a}
+    .decision{padding:12px;border-radius:14px;font-weight:900;margin-top:10px;border:1px solid rgba(255,255,255,.1)}
+    table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px solid rgba(255,255,255,.08);padding:9px;text-align:left}th{color:var(--accent);font-size:12px}
+    .exercise-row{display:grid;grid-template-columns:1.2fr .7fr .7fr .7fr .9fr auto;gap:6px;align-items:end;margin-bottom:8px}
+    .coach{background:#0e1a23;border-left:4px solid var(--accent);padding:13px;border-radius:14px;white-space:pre-wrap;line-height:1.45;font-size:14px}
+    .toast{position:fixed;left:16px;right:16px;bottom:88px;background:#102432;border:1px solid var(--accent);border-radius:16px;padding:12px;display:none;z-index:30;box-shadow:var(--shadow)}
+    @media(max-width:680px){.exercise-row{grid-template-columns:1fr 1fr}.exercise-row button{grid-column:span 2}.statgrid{grid-template-columns:1fr 1fr}h1{font-size:26px}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="kicker">TRAINING COMMAND CENTRE</div>
+  <h1>Leon Fitness Tracker v3</h1>
+  <div class="sub">Now with selectable 14-day programme tabs, saved workout logs, history and one-tap repopulation.</div>
+</header>
+
+<main>
+<section id="dash" class="active">
+  <div class="grid">
+    <div class="card">
+      <div class="row"><h2>Current Status</h2><span id="todayLabel" class="pill"></span></div>
+      <div class="statgrid">
+        <div class="stat"><small>Phase</small><strong id="phaseText">--</strong></div>
+        <div class="stat"><small>Weight</small><strong id="weightText">--</strong></div>
+        <div class="stat"><small>Body Fat</small><strong id="bfText">--</strong></div>
+        <div class="stat"><small>Visceral Fat</small><strong id="vfText">--</strong></div>
+      </div>
+      <label>Phase Progress</label><div class="progress"><div id="phaseBar" class="bar"></div></div>
+      <p id="phaseNote" class="note"></p>
+    </div>
+    <div class="card">
+      <h2>Daily Check-in</h2>
+      <div class="statgrid">
+        <div><label>Stone</label><input id="stone" type="number" value="11"></div>
+        <div><label>Pounds</label><input id="pounds" type="number" step="0.1" value="7.2"></div>
+        <div><label>Calories</label><input id="calories" type="number" value="1670"></div>
+        <div><label>Protein (g)</label><input id="protein" type="number" value="197"></div>
+        <div><label>Steps</label><input id="steps" type="number" value="6136"></div>
+        <div><label>Sleep (hours)</label><input id="sleep" type="number" step="0.1" value="6.3"></div>
+        <div><label>Body fat %</label><input id="bodyFat" type="number" step="0.1" value="17.0"></div>
+        <div><label>Visceral fat</label><input id="visceral" type="number" step="0.1" value="5"></div>
+        <div><label>Muscle mass (kg)</label><input id="muscle" type="number" step="0.1" value="57.6"></div>
+        <div><label>Waist</label><input id="waist" placeholder="cm or inches"></div>
+      </div>
+      <label>Garmin / RENPHO note</label><textarea id="note" placeholder="Recovery, HRV, digestion, soreness..."></textarea>
+      <div class="row" style="margin-top:10px">
+        <button class="primary" onclick="saveCheckin()">Save Check-in</button><button onclick="autofillLast()">Autofill Last</button><button onclick="nudgeProtein()">+10g Protein</button><button onclick="nudgeSteps()">+1000 Steps</button>
+      </div>
+    </div>
+    <div class="card"><h2>Coach Mode</h2><div id="coachMode" class="coach"></div></div>
+  </div>
+</section>
+
+<section id="programme">
+  <div class="grid">
+    <div class="card">
+      <div class="row"><h2>14-Day Programme</h2><span id="selectedDayLabel" class="pill">Day 1</span></div>
+      <div class="subtabs" id="dayTabs"></div>
+      <div id="programmeDay" class="daycard"></div>
+      <div class="row" style="margin-top:10px">
+        <button onclick="prevDay()">Previous Day</button>
+        <button onclick="nextDay()">Next Day</button>
+        <button class="primary" onclick="askApplyDay()">Use This Day</button>
+      </div>
+      <p class="note">Use This Day asks whether you want to replace your current gym log with the selected day. This prevents accidental overwrites.</p>
+    </div>
+  </div>
+</section>
+
+<section id="gym">
+  <div class="grid">
+    <div class="card">
+      <h2>Workout Log</h2>
+      <div class="statgrid">
+        <div><label>Session Name</label><input id="sessionName" value="PureGym Top-Up"></div>
+        <div><label>Date</label><input id="sessionDate" type="date"></div>
+      </div>
+      <div id="exerciseList" style="margin-top:12px"></div>
+      <button onclick="addExercise()">Add Exercise</button>
+      <button class="primary" onclick="makeWorkoutSummary()">Create Summary</button>
+      <button onclick="saveWorkoutLog()">Save Workout Log</button>
+      <button onclick="emailWorkout()">Email Summary</button>
+      <label>Workout Summary</label><textarea id="workoutSummary" style="min-height:180px"></textarea>
+    </div>
+    <div class="card">
+      <h2>Saved Templates</h2>
+      <button onclick="loadTemplate('push')">Push</button><button onclick="loadTemplate('pull')">Pull</button><button onclick="loadTemplate('legs')">Legs</button><button onclick="loadTemplate('topup')">PureGym Top-Up</button>
+      <div style="margin-top:10px"><button onclick="saveCurrentAsTemplate()">Save Current as Template</button></div>
+      <div id="customTemplates"></div>
+    </div>
+  </div>
+</section>
+
+<section id="history">
+  <div class="grid">
+    <div class="card">
+      <h2>Historical Workout Logs</h2>
+      <div id="workoutHistory"></div>
+    </div>
+    <div class="card">
+      <h2>Daily Check-in History</h2>
+      <div id="historyTable"></div>
+    </div>
+  </div>
+</section>
+
+<section id="recovery">
+  <div class="grid">
+    <div class="card">
+      <h2>Recovery Dashboard</h2>
+      <div class="statgrid">
+        <div><label>Sleep Score</label><input id="sleepScore" type="number" value="77"></div>
+        <div><label>Body Battery</label><input id="bodyBattery" type="number" value="65"></div>
+        <div><label>Training Readiness</label><input id="readiness" type="number" value="58"></div>
+        <div><label>HRV Status</label><select id="hrv"><option>Balanced</option><option>Unbalanced</option><option>Low</option></select></div>
+        <div><label>Resting HR</label><input id="rhr" type="number" value="55"></div>
+        <div><label>Stress</label><input id="stress" type="number" value="22"></div>
+      </div>
+      <button class="primary" onclick="updateAll()" style="margin-top:12px">Update Recovery Decision</button>
+      <div id="recoveryDecision" class="decision"></div>
+    </div>
+  </div>
+</section>
+
+<section id="plans">
+  <div class="grid">
+    <div class="card"><h2>Phase Map</h2><table><thead><tr><th>Phase</th><th>Weight Range</th><th>Focus</th></tr></thead><tbody id="phaseTable"></tbody></table></div>
+    <div class="card"><h2>Nutrition Dashboard</h2><div class="statgrid"><div class="stat"><small>Day Type</small><strong>Cut / Recomp</strong></div><div class="stat"><small>Calories</small><strong>1,700-1,950</strong></div><div class="stat"><small>Protein</small><strong>180-210g</strong></div><div class="stat"><small>Fibre</small><strong>25-35g</strong></div></div></div>
+  </div>
+</section>
+</main>
+
+<div id="toast" class="toast"></div>
+
+<nav class="tabs">
+  <div class="tab active" onclick="showTab('dash',this)">Dash</div>
+  <div class="tab" onclick="showTab('programme',this)">14 Days</div>
+  <div class="tab" onclick="showTab('gym',this)">Gym</div>
+  <div class="tab" onclick="showTab('history',this)">History</div>
+  <div class="tab" onclick="showTab('recovery',this)">Recovery</div>
+  <div class="tab" onclick="showTab('plans',this)">Plans</div>
+</nav>
+
+<script>
+const phases=[{name:"Phase 4.5",min:163,max:169,focus:"Precision cut toward 11 st 9 lb"},{name:"Phase 5.1",min:161,max:165,focus:"Lean cut/recomp. Keep training quality high."},{name:"Phase 5.2",min:159,max:164,focus:"Cut phase active. Preserve strength and keep protein covered."},{name:"Phase 5.3",min:155,max:161,focus:"Final tightening phase"},{name:"Phase 6",min:161,max:183,focus:"Controlled lean bulk / full frame rebuild"}];
+
+const programme=[
+{name:"Day 1 - Push A",type:"Push",focus:"Chest, shoulders, arms",ex:[["Dumbbell Bench Press","32","3","8-12","Hard"],["Incline Dumbbell Press","32","3","8-12","Hard"],["Arnold Press","18","3","10","Medium"],["Seated Lateral Raise","6","3","12-15","Easy"],["Tricep Extension","","3","10-12","Medium"],["Crunch","10","3","12","Easy"]]},
+{name:"Day 2 - Pull A",type:"Pull",focus:"Lats, rear delts, biceps",ex:[["Lat Pulldown","59","3","8-12","Hard"],["Cable Row","","3","10","Medium"],["Rear Delt Fly","50","2","10-12","Medium"],["Bicep Curl","16","3","10","Hard"],["Hammer Curl","18","3","10","Medium"]]},
+{name:"Day 3 - Recovery",type:"Recovery",focus:"Steps, mobility, hydration",ex:[["Incline Walk","","1","20-30 min","Easy"],["Mobility","","1","10 min","Easy"],["Dead Bug","BW","3","10","Easy"]]},
+{name:"Day 4 - Legs A",type:"Legs",focus:"Knee-friendly lower body",ex:[["Leg Press","","3","10","Medium"],["Calf Press","","3","12-15","Medium"],["Seated Hamstring Curl","","3","10","Medium"],["Bodyweight Squat","BW","2","10","Easy"]]},
+{name:"Day 5 - Push B",type:"Push",focus:"Upper chest and delts",ex:[["Incline Dumbbell Press","34","3","8-10","Hard"],["Smith Machine Press","60","2","10","Hard"],["Chest Press Machine","","3","10-12","Medium"],["Lateral Raise","6","3","15","Medium"],["Hanging Knee Raise","BW","3","12-15","Medium"]]},
+{name:"Day 6 - Pull B",type:"Pull",focus:"Back width and biceps",ex:[["Lat Pulldown","64","3","8-10","Hard"],["Single Arm Row","","3","10","Medium"],["Rear Delt Fly","50","3","10","Medium"],["EZ Bar Curl","16","3","10","Hard"]]},
+{name:"Day 7 - Recovery",type:"Recovery",focus:"Sleep, walking, nutrition",ex:[["Walk","","1","30-45 min","Easy"],["Stretch","","1","10 min","Easy"]]},
+{name:"Day 8 - Push A Repeat",type:"Push",focus:"Beat Day 1 by one rep",ex:[["Dumbbell Bench Press","32","3","8-12","Hard"],["Incline Dumbbell Press","32","3","8-12","Hard"],["Arnold Press","18","3","10","Medium"],["Seated Lateral Raise","6","3","12-15","Easy"],["Tricep Extension","","3","10-12","Medium"],["Crunch","10","3","12","Easy"]]},
+{name:"Day 9 - Pull A Repeat",type:"Pull",focus:"Beat Day 2 by one rep",ex:[["Lat Pulldown","59","3","8-12","Hard"],["Cable Row","","3","10","Medium"],["Rear Delt Fly","50","2","10-12","Medium"],["Bicep Curl","16","3","10","Hard"],["Hammer Curl","18","3","10","Medium"]]},
+{name:"Day 10 - Recovery",type:"Recovery",focus:"HRV and knee management",ex:[["Incline Walk","","1","20-30 min","Easy"],["Mobility","","1","10 min","Easy"]]},
+{name:"Day 11 - Legs B",type:"Legs",focus:"Knee-friendly lower body",ex:[["Leg Press","","3","10","Medium"],["Calf Press","","3","12-15","Medium"],["Hamstring Curl","","3","10","Medium"],["Step-up","BW","2","8 each side","Easy"]]},
+{name:"Day 12 - Push C",type:"Push",focus:"Chest top-up and abs",ex:[["Chest Press Machine","","3","10-12","Medium"],["Incline Chest Press Machine","","3","10-12","Medium"],["Lateral Raise","6","3","15","Medium"],["Hanging Knee Raise","BW","3","15","Medium"]]},
+{name:"Day 13 - Pull C",type:"Pull",focus:"Lat width",ex:[["Lat Pulldown","64","3","8-12","Hard"],["Cable Row","","3","10","Medium"],["Face Pull","","3","12-15","Medium"],["Hammer Curl","18","3","10","Medium"]]},
+{name:"Day 14 - Test / Review",type:"Review",focus:"Photos, scale, best lifts",ex:[["Progress Photos","","1","Front / Side / Back",""],["Scale Check","","1","Wake, toilet, before food",""],["Best Lift Review","","1","Bench / Incline / Pulldown",""]]}
+];
+let currentDay=0;
+
+function lbFromStone(st,p){return(Number(st)*14)+Number(p)} function kgFromLb(lb){return lb*0.45359237}
+function stlbFromLb(lb){const st=Math.floor(lb/14);const p=(lb-st*14).toFixed(1);return `${st} st ${p} lb`}
+function getPhase(lb){if(lb<=161)return{name:"Phase 5.3",focus:"Final tightening, avoid excessive muscle loss.",min:155,max:161};if(lb<=165)return{name:"Phase 5.2",focus:"Cut phase active. Preserve strength and keep protein covered.",min:161,max:165};if(lb<=169)return{name:"Phase 5.1",focus:"Lean cut/recomp. Keep training quality high.",min:165,max:169};if(lb<=177)return{name:"Phase 4.5",focus:"Precision cut zone.",min:169,max:177};return{name:"Earlier Phase",focus:"Continue fat-loss structure.",min:177,max:205}}
+function showToast(html){toast.innerHTML=html;toast.style.display='block';setTimeout(()=>toast.style.display='none',6000)}
+function showTab(id,el){document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active')}
+function updateAll(){const lb=lbFromStone(stone.value,pounds.value),kg=kgFromLb(lb),phase=getPhase(lb);phaseText.textContent=phase.name;weightText.textContent=`${stlbFromLb(lb)} / ${kg.toFixed(1)} kg`;bfText.textContent=`${bodyFat.value}%`;vfText.textContent=visceral.value;todayLabel.textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'2-digit',month:'short',year:'numeric'});phaseBar.style.width=Math.max(0,Math.min(100,((phase.max-lb)/(phase.max-phase.min))*100))+"%";phaseNote.textContent=phase.focus;const rd=Number(readiness.value),bb=Number(bodyBattery.value),ss=Number(sleepScore.value);let decision="AMBER: Train normally, keep 1-2 reps in reserve.",cls="badge-amber";if(rd>=70&&bb>=65&&ss>=75&&hrv.value==="Balanced"){decision="GREEN: Productive training day. Push progression, but do not chase ego reps.";cls="badge-green"}if(rd<45||bb<35||ss<65||hrv.value==="Low"){decision="RED: Recovery priority. Walk, mobility, nutrition and sleep.";cls="badge-red"}recoveryDecision.className=`decision ${cls}`;recoveryDecision.textContent=decision;coachMode.textContent=`STATUS: ${stlbFromLb(lb)} / ${kg.toFixed(1)} kg, ${bodyFat.value}% body fat, visceral fat ${visceral.value}.\nINTERPRETATION: Weight is in ${phase.name}. Use trend evidence, not one reading.\nCLASSIFICATION: ${decision.startsWith('GREEN')?'Progression day':decision.startsWith('RED')?'Recovery day':'Moderate training day'}.\nPHASE IMPACT: ${phase.focus}\nCOMMAND: Protein ${protein.value}g logged/targeted. Calories ${calories.value}. Steps ${steps.value}. Adjust today based on recovery, not guilt.\nVERDICT: Preserve strength, keep protein covered, and let the weekly trend decide the next move.`}
+function buildDayTabs(){dayTabs.innerHTML='';programme.forEach((d,i)=>{const b=document.createElement('button');b.className='subtab'+(i===currentDay?' active':'');b.textContent=`Day ${i+1}`;b.onclick=()=>selectDay(i);dayTabs.appendChild(b)})}
+function selectDay(i){currentDay=i;buildDayTabs();const d=programme[i];selectedDayLabel.textContent=`Day ${i+1}`;programmeDay.innerHTML=`<h2>${d.name}</h2><p class="note"><b>Type:</b> ${d.type}<br><b>Focus:</b> ${d.focus}</p><table><thead><tr><th>Exercise</th><th>Weight</th><th>Sets</th><th>Reps</th><th>Difficulty</th></tr></thead><tbody>${d.ex.map(x=>`<tr><td>${x[0]}</td><td>${x[1]||'--'}</td><td>${x[2]}</td><td>${x[3]}</td><td>${x[4]||'--'}</td></tr>`).join('')}</tbody></table>`}
+function prevDay(){selectDay((currentDay+13)%14)} function nextDay(){selectDay((currentDay+1)%14)}
+function askApplyDay(){const d=programme[currentDay];showToast(`<b>Use ${d.name}?</b><br><br>This will replace your current workout log.<br><button class="primary" onclick="applyProgrammeDay();toast.style.display='none'">Yes, update workout log</button><button onclick="toast.style.display='none'">Cancel</button>`)}
+function applyProgrammeDay(){const d=programme[currentDay];sessionName.value=d.name;exerciseList.innerHTML='';d.ex.forEach(x=>addExercise(...x));makeWorkoutSummary();document.querySelector('[onclick*="gym"]').click()}
+function addExercise(name='',weight='',sets='',reps='',rpe=''){const wrap=document.createElement('div');wrap.className='exercise-row';wrap.innerHTML=`<div><label>Exercise</label><input class="ex-name" value="${name}"></div><div><label>Weight kg</label><input class="ex-weight" value="${weight}"></div><div><label>Sets</label><input class="ex-sets" value="${sets}"></div><div><label>Reps</label><input class="ex-reps" value="${reps}"></div><div><label>Difficulty</label><input class="ex-rpe" value="${rpe}"></div><button class="danger" onclick="this.parentElement.remove()">Remove</button>`;exerciseList.appendChild(wrap)}
+function getCurrentExercises(){return[...document.querySelectorAll('.exercise-row')].map(r=>({name:r.querySelector('.ex-name').value,weight:r.querySelector('.ex-weight').value,sets:r.querySelector('.ex-sets').value,reps:r.querySelector('.ex-reps').value,rpe:r.querySelector('.ex-rpe').value}))}
+function loadExercises(arr){exerciseList.innerHTML='';arr.forEach(x=>addExercise(x.name,x.weight,x.sets,x.reps,x.rpe));makeWorkoutSummary()}
+function loadTemplate(t){exerciseList.innerHTML='';const templates={push:[["Dumbbell Bench Press","32","3","8-12","Hard"],["Incline Dumbbell Press","32","3","8-12","Hard"],["Arnold Press","18","3","10","Medium"],["Lateral Raise","6","3","12-15","Easy"],["Tricep Extension","","3","10-12","Medium"]],pull:[["Lat Pulldown","59","3","8-12","Hard"],["Cable Row","","3","10","Medium"],["Rear Delt Fly","50","2","10-12","Medium"],["Bicep Curl","16","3","10","Hard"],["Hammer Curl","18","3","10","Medium"]],legs:[["Leg Press","","3","10","Knee-friendly"],["Calf Press","","3","12-15","Medium"],["Seated Hamstring Curl","","3","10","Medium"],["Bodyweight Squat","","2","10","Easy"]],topup:[["Lat Pulldown","59-64","3","8-12","Hard"],["Chest Press Machine","","3","10-12","Medium"],["Incline Chest Press Machine","","3","10-12","Medium"],["Hanging Knee Raise","BW","3","12-15","Medium"],["Incline Walk","","1","10-20 min","Easy"]]};templates[t].forEach(x=>addExercise(...x));makeWorkoutSummary()}
+function makeWorkoutSummary(){const rows=getCurrentExercises();let out=`${sessionDate.value||new Date().toLocaleDateString('en-GB')} - ${sessionName.value}\n\n`;rows.forEach(x=>{out+=`${x.name}\n${x.weight||'BW'} kg - ${x.sets} x ${x.reps} - ${x.rpe}\n\n`});workoutSummary.value=out.trim()}
+function saveWorkoutLog(){makeWorkoutSummary();const logs=JSON.parse(localStorage.getItem('workoutLogs')||'[]');logs.push({id:Date.now(),date:sessionDate.value||new Date().toISOString().slice(0,10),name:sessionName.value,exercises:getCurrentExercises(),summary:workoutSummary.value});localStorage.setItem('workoutLogs',JSON.stringify(logs));renderWorkoutHistory();showToast("Workout log saved. You can reload it from History.")}
+function saveCurrentAsTemplate(){const name=prompt("Template name?");if(!name)return;const templates=JSON.parse(localStorage.getItem('customTemplates')||'[]');templates.push({id:Date.now(),name,exercises:getCurrentExercises()});localStorage.setItem('customTemplates',JSON.stringify(templates));renderCustomTemplates();showToast("Template saved.")}
+function renderCustomTemplates(){const t=JSON.parse(localStorage.getItem('customTemplates')||'[]');customTemplates.innerHTML=t.map(x=>`<div class="daycard"><b>${x.name}</b><br><button onclick="loadSavedTemplate(${x.id})">Load</button><button class="danger" onclick="deleteTemplate(${x.id})">Delete</button></div>`).join('')}
+function loadSavedTemplate(id){const t=JSON.parse(localStorage.getItem('customTemplates')||'[]').find(x=>x.id===id);if(t){sessionName.value=t.name;loadExercises(t.exercises)}}
+function deleteTemplate(id){localStorage.setItem('customTemplates',JSON.stringify(JSON.parse(localStorage.getItem('customTemplates')||'[]').filter(x=>x.id!==id)));renderCustomTemplates()}
+function renderWorkoutHistory(){const logs=JSON.parse(localStorage.getItem('workoutLogs')||'[]').slice().reverse();workoutHistory.innerHTML=logs.length?logs.map(x=>`<div class="daycard"><b>${x.date} - ${x.name}</b><pre class="note">${x.summary}</pre><button class="primary" onclick="reloadWorkout(${x.id})">Repopulate Gym Log</button><button onclick="duplicateWorkout(${x.id})">Duplicate Today</button><button class="danger" onclick="deleteWorkout(${x.id})">Delete</button></div>`).join(''):'<p class="note">No saved workout logs yet.</p>'}
+function reloadWorkout(id){const x=JSON.parse(localStorage.getItem('workoutLogs')||'[]').find(l=>l.id===id);if(x){sessionName.value=x.name;sessionDate.value=x.date;loadExercises(x.exercises);document.querySelector('[onclick*="gym"]').click()}}
+function duplicateWorkout(id){const x=JSON.parse(localStorage.getItem('workoutLogs')||'[]').find(l=>l.id===id);if(x){sessionName.value=x.name;sessionDate.value=new Date().toISOString().slice(0,10);loadExercises(x.exercises);document.querySelector('[onclick*="gym"]').click()}}
+function deleteWorkout(id){localStorage.setItem('workoutLogs',JSON.stringify(JSON.parse(localStorage.getItem('workoutLogs')||'[]').filter(x=>x.id!==id)));renderWorkoutHistory()}
+function emailWorkout(){makeWorkoutSummary();location.href=`mailto:?subject=${encodeURIComponent('Workout Summary - '+(sessionDate.value||new Date().toLocaleDateString('en-GB')))}&body=${encodeURIComponent(workoutSummary.value)}`}
+function saveCheckin(){const data=JSON.parse(localStorage.getItem('checkins')||'[]');data.push({date:new Date().toISOString(),stone:stone.value,pounds:pounds.value,calories:calories.value,protein:protein.value,steps:steps.value,sleep:sleep.value,bodyFat:bodyFat.value,visceral:visceral.value,muscle:muscle.value,note:note.value});localStorage.setItem('checkins',JSON.stringify(data));renderHistory();updateAll()}
+function autofillLast(){const data=JSON.parse(localStorage.getItem('checkins')||'[]');if(!data.length)return;const x=data[data.length-1];for(const k of ['stone','pounds','calories','protein','steps','sleep','bodyFat','visceral','muscle','note'])if(window[k])window[k].value=x[k]||'';updateAll()}
+function nudgeProtein(){protein.value=Number(protein.value||0)+10;updateAll()} function nudgeSteps(){steps.value=Number(steps.value||0)+1000;updateAll()}
+function renderHistory(){const data=JSON.parse(localStorage.getItem('checkins')||'[]').slice(-10).reverse();historyTable.innerHTML=data.length?'<table><thead><tr><th>Date</th><th>Weight</th><th>Calories</th><th>Protein</th><th>Steps</th><th>Sleep</th></tr></thead><tbody>'+data.map(x=>`<tr><td>${new Date(x.date).toLocaleDateString('en-GB')}</td><td>${x.stone} st ${x.pounds} lb</td><td>${x.calories}</td><td>${x.protein}g</td><td>${x.steps}</td><td>${x.sleep}h</td></tr>`).join('')+'</tbody></table>':'<p class="note">No check-ins saved yet.</p>'}
+function buildPhaseTable(){phaseTable.innerHTML=phases.map(p=>`<tr><td>${p.name}</td><td>${p.min}-${p.max} lb</td><td>${p.focus}</td></tr>`).join('')}
+sessionDate.valueAsDate=new Date();buildPhaseTable();buildDayTabs();selectDay(0);loadTemplate('topup');renderCustomTemplates();renderWorkoutHistory();renderHistory();updateAll();
+</script>
+</body>
+</html>
